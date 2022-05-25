@@ -498,6 +498,18 @@ public:
     // Eigen/Coreがincludeされている場合
 
     /**
+     * @brief width, height, depthの整数ベクトルから構築
+    */
+    Grid3D(Eigen::Vector3i const & size, data_type const & init)
+        : Grid3D(size.x(), size.y(), size.z(), init){}
+
+    /**
+     * @brief width, height, depthの整数ベクトルから構築
+    */
+    Grid3D(Eigen::Vector3i const & size)
+        : Grid3D(size.x(), size.y(), size.z()){}
+
+    /**
      * @brief (x, y, z)で要素アクセス
      * @param[in] pos (x,y,z)の整数ベクトル
     */

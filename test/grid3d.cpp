@@ -46,5 +46,9 @@ int main(){
     grid.print_size();
     std::cout << "---" << std::endl;
 
+    grid[1][2][5] = 3;
+    grid.print();
+    std::cout << "---" << std::endl;
+
     return 0;
 }

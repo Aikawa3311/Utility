@@ -105,6 +105,24 @@ public:
     }
 
     /**
+     * @brief 複数の列を後方に追加
+     * @param[in] n 追加する数
+     * @param[in] init 初期化する値
+    */
+    void push_back_columns(size_type const n, data_type const & init){
+        for(size_type i=0; i<n; ++i) push_back_column(init);
+    }
+
+    /**
+     * @brief 複数の行を後方に追加
+     * @param[in] n 追加する数
+     * @param[in] init 初期化する値
+    */
+    void push_back_rows(size_type const n, data_type const & init){
+        for(size_type i=0; i<n; ++i) push_back_row(init);
+    }
+
+    /**
      * @brief 任意の列の削除
      * @param[in] pos 消したい列(pos(0-indexed)列目となるように)
     */
@@ -143,6 +161,20 @@ public:
     }
 
     /**
+     * @brief 後方の複数の列の削除
+    */
+    void pop_back_columns(size_type const n){
+        for(size_type i=0; i<n; ++i) pop_back_column();
+    }
+
+    /**
+     * @brief 後方の複数の行の削除
+    */
+    void pop_back_rows(size_type const n){
+        for(size_type i=0; i<n; ++i) pop_back_row();
+    }
+
+    /**
      * @brief リザーブ
      * @note m_width, m_heightは変えない
     */
@@ -164,15 +196,15 @@ public:
     void resize(size_type const w, size_type const h, data_type const & init){
         // 幅を合わせる
         if(w < m_width){
-            for(size_type i=0; i<m_width - w; ++i) pop_back_column();
+            pop_back_columns(m_width - w);
         }else if(w > m_width){
-            for(size_type i=0; i<m_width - w; ++i) push_back_column(init);
+            push_back_columns(w - m_width, init);
         }
         // 縦を合わせる
         if(h < m_height){
-            for(size_type i=0; i<m_height - h; ++i) pop_back_row();
+            pop_back_rows(m_height - h);
         }else if(h > m_height){
-            for(size_type i=0; i<m_height - h; ++i) push_back_row(init);
+            push_back_rows(h - m_height, init);
         }
     }
 
@@ -289,6 +321,13 @@ public:
             }
             std::cout << std::endl;
         }
+    }
+
+    /**
+     * @brief サイズの出力
+    */
+    void print_size() const {
+        std::cout << "(width:" << m_width << " height:" << m_height << ")" << std::endl;
     }
 
     /**

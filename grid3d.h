@@ -309,6 +309,8 @@ public:
 
     /**
      * @brief リサイズ
+     * @param[in] size (width, height, depth)のタプル
+     * @param[in] init 初期化したい値
     */
     void resize(std::tuple<size_type, size_type, size_type> const & size, data_type const & init){
         resize(std::get<0>(size), std::get<1>(size), std::get<2>(size), init);
@@ -356,8 +358,8 @@ public:
     }
 
     /**
-     * @brief (x,y,z)のペアにより要素アクセス
-     * @param[in] pos (x,y,z)のペア
+     * @brief (x,y,z)のタプルにより要素アクセス
+     * @param[in] pos (x,y,z)のタプル
     */
     data_type & at(std::tuple<int, int, int> const pos){
         return m_data.at(std::get<0>(pos) + std::get<1>(pos)*m_width + std::get<2>(pos)*m_width*m_height);
@@ -371,8 +373,8 @@ public:
     }
 
     /**
-     * @brief (x,y,z)のペアにより要素アクセス const
-     * @param[in] pos (x,y,z)のペア
+     * @brief (x,y,z)のタプルにより要素アクセス const
+     * @param[in] pos (x,y,z)のタプル
     */
     data_type const & at(std::tuple<int, int, int> const pos) const {
         return m_data.at(std::get<0>(pos) + std::get<1>(pos)*m_width + std::get<2>(pos)*m_width*m_height);
@@ -386,6 +388,17 @@ public:
     }
     Grid3DAccessController<data_type> const operator [] (int const z) const {
         return Grid3DAccessController<data_type>(this, z);
+    }
+
+    /**
+     * @brief (x, y, z)で要素アクセス
+     * @param[in] pos (x,y,z)のタプル
+    */
+    data_type & operator [] (std::tuple<int, int, int> const & pos){
+        return operator[](std::get<2>(pos))[std::get<1>(pos)][std::get<0>(pos)];
+    }
+    data_type const & operator [] (std::tuple<int, int, int> const & pos) const {
+        return operator[](std::get<2>(pos))[std::get<1>(pos)][std::get<0>(pos)];
     }
 
     /**
@@ -479,6 +492,70 @@ public:
             }
         }
     }
+
+#ifdef EIGEN_CORE_H
+
+    // Eigen/Coreがincludeされている場合
+
+    /**
+     * @brief (x, y, z)で要素アクセス
+     * @param[in] pos (x,y,z)の整数ベクトル
+    */
+    data_type & at(Eigen::Vector3i const & pos){
+        return at(pos.z(), pos.y(), pos.x());
+    }
+
+    /**
+     * @brief (x, y, z)で要素アクセス const
+     * @param[in] pos (x,y,z)の整数ベクトル
+    */
+    data_type const & at(Eigen::Vector3i const & pos) const {
+        return at(pos.z(), pos.y(), pos.x());
+    }
+
+    /**
+     * @brief (x, y, z)で要素アクセス
+     * @param[in] pos (x,y,z)の整数ベクトル
+    */
+    data_type & operator [] (Eigen::Vector3i const & pos){
+        return operator[](pos.z())[pos.y()][pos.x()];
+    }
+
+    /**
+     * @brief (x, y, z)で要素アクセス const
+     * @param[in] pos (x,y,z)の整数ベクトル
+    */
+    data_type const & operator [] (Eigen::Vector3i const & pos) const {
+        return operator[](pos.z())[pos.y()][pos.x()];
+    }
+
+    /**
+     * @brief リサイズ
+     * @param[in] size (width, height, depth)の整数ベクトル
+     * @param[in] init 初期化したい値
+    */
+    void resize(Eigen::Vector3i const & size, data_type const & init){
+        resize(size.x(), size.y(), size.z(), init);
+    }
+
+    /**
+     * @brief リサイズ
+     * @param[in] size (width, height, depth)の整数ベクトル
+    */
+    void resize(Eigen::Vector3i const & size){
+        resize(size.x(), size.y(), size.z());
+    }
+
+    /**
+     * @brief (x, y, z)が範囲内に収まるかを調べる
+     * @param[in] pos (x, y, z)の整数ベクトル
+     * @return 収まっていたらtrue
+    */
+    bool in(Eigen::Vector3i const & pos) const {
+        return in(pos.z(), pos.y(), pos.x());
+    }
+
+#endif
 
 };
 

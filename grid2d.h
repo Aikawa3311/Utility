@@ -19,9 +19,9 @@ public:
     using size_type = size_t;
 
 private: 
-    container_type m_data;
-    size_type m_width = 0;
-    size_type m_height = 0;
+    container_type m_data;  // [x + y * m_width]でデータへアクセス
+    size_type m_width = 0;  // 横
+    size_type m_height = 0; // 縦
 
 public:
     Grid2D(size_type const m_width = 0, size_type const m_height = 0)

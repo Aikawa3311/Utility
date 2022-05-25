@@ -10,6 +10,34 @@
 
 namespace Utility{
 
+template <typename data_type>
+class Grid3D;
+
+/**
+ * @brief Grid3Dのoperator[]アクセス用クラス
+*/
+template <typename data_type>
+class Grid3DAccessController{
+private:
+    Grid3D<data_type> * grid;
+    int z_pos;
+
+public:
+    Grid3DAccessController(Grid3D<data_type> * grid, int const z_pos)
+        : grid(grid),
+        z_pos(z_pos){}
+    
+    /**
+     * @brief [y][x]で要素アクセス
+    */
+    data_type * operator [] (int const y){
+        return grid->data[z_pos * (grid->width()) * (grid->height()) + y * grid->width()];
+    }
+    data_type const * operator [] (int const y) const {
+        return grid->data[z_pos * (grid->width()) * (grid->height()) + y * grid->width()];
+    }
+};
+
 /**
  * @brief 三次元配列クラス at(z,y,x)でアクセス
 */
@@ -70,9 +98,10 @@ public:
 
         for(size_type i=0; i<m_depth; ++i){
             for(size_type j=0; j<m_height; ++j){
-                m_data.insert(m_data.begin() + (pos + j * (m_width + 1) + i * (m_width + 1) * (m_height)), init);
+                m_data.insert(m_data.begin() + pos + j * (m_width + 1) + i * (m_width + 1) * (m_height), init);
             }
         }
+
         ++m_width;
     }
 
@@ -84,11 +113,24 @@ public:
     void insert_row(int const pos, data_type const & init){
         reserve(m_width, m_height+1, m_depth);
 
-        for(int i=0; i<m_depth; ++i){
+        for(size_type i=0; i<m_depth; ++i){
             m_data.insert(m_data.begin() + pos*m_width + i * (m_width) * (m_height + 1), m_width, init);
         }
         
-        ++m_width;
+        ++m_height;
+    }
+
+    /**
+     * @brief 奥の挿入
+     * @param[in] pos 挿入する場所(挿入する位置がpos奥目になるように)
+     * @param[in] init 初期化する値
+    */
+    void insert_depth(int const pos, data_type const & init){
+        reserve(m_width, m_height, m_depth+1);
+
+        m_data.insert(m_data.begin() + pos*m_width*m_height, m_width*m_height, init);
+        
+        ++m_depth;
     }
 
     /**
@@ -104,10 +146,42 @@ public:
      * @param[in] init 初期化する値
     */
     void push_back_row(data_type const & init){
-        for(size_type i=0; i<m_width; ++i){
+        insert_row(m_height, init);
+    }
+
+    /**
+     * @brief 奥を後方に追加
+     * @param[in] init 初期化する値
+    */
+    void push_back_depth(data_type const & init){
+        for(size_type i=0; i<m_width*m_height; ++i){
             m_data.push_back(init);
         }
-        ++m_height;
+        ++m_depth;
+    }
+
+    /**
+     * @brief 複数の列を後方に追加
+     * @param[in] init 初期化する値
+    */
+    void push_back_columns(size_type const n, data_type const & init){
+        for(size_type i=0; i<n; ++i) push_back_column(init);
+    }
+
+    /**
+     * @brief 複数の行を後方に追加
+     * @param[in] init 初期化する値
+    */
+    void push_back_rows(size_type const n, data_type const & init){
+        for(size_type i=0; i<n; ++i) push_back_row(init);
+    }
+
+    /**
+     * @brief 複数の奥を後方に追加
+     * @param[in] init 初期化する値
+    */
+    void push_back_depths(size_type const n, data_type const & init){
+        for(size_type i=0; i<n; ++i) push_back_depth(init);
     }
 
     /**
@@ -121,6 +195,7 @@ public:
             return (index++) % width == pos;
         });
         m_data.erase(remove_it, m_data.end());
+
         --m_width;
     }
 
@@ -128,9 +203,33 @@ public:
      * @brief 任意の行の削除
      * @param[in] pos 消したい行(pos(0-indexed)行目となるように)
     */
-    void remove_row(int const pos){
-        m_data.erase(m_data.begin() + pos * m_width, m_data.begin() + (pos + 1) * m_width);
+    void remove_row(size_type const pos){
+        // auto it = m_data.begin() + pos * m_width;
+
+        // for(size_type i=0; i<m_depth; ++i){
+        //     auto it_begin = it + i * m_width * m_height;
+        //     it = m_data.erase(it_begin, it_begin + m_width);
+        // }
+
+        int index = 0;
+
+        auto remove_it = std::remove_if(m_data.begin(), m_data.end(), [width = m_width, height = m_height, &pos, &index](data_type const &){
+            return ((index++) / width) % height == pos;
+        });
+        m_data.erase(remove_it, m_data.end());
+
         --m_height;
+    }
+
+    /**
+     * @brief 任意の奥の削除
+     * @param[in] pos 消したい奥(pos(0-indexed)奥目となるように)
+    */
+    void remove_depth(int const pos){
+        auto it_begin = m_data.begin() + pos * m_width * m_height;
+        m_data.erase(it_begin, it_begin + m_width * m_height);
+        
+        --m_depth;
     }
 
     /**
@@ -144,8 +243,36 @@ public:
      * @brief 後方の行の削除
     */
     void pop_back_row(){
-        --m_height;
-        m_data.resize(m_data.size() - m_width);
+        remove_row(m_height - 1);
+    }
+
+    /**
+     * @brief 後方の奥の削除
+    */
+    void pop_back_depth(){
+        --m_depth;
+        m_data.resize(m_data.size() - m_width * m_height);
+    }
+
+    /**
+     * @brief 後方の複数の列の削除
+    */
+    void pop_back_columns(size_type const n){
+        for(size_type i=0; i<n; ++i) pop_back_column();
+    }
+
+    /**
+     * @brief 後方の複数の行の削除
+    */
+    void pop_back_rows(size_type const n){
+        for(size_type i=0; i<n; ++i) pop_back_row();
+    }
+
+    /**
+     * @brief 後方の複数の奥の削除
+    */
+    void pop_back_depths(size_type const n){
+        for(size_type i=0; i<n; ++i) pop_back_depth();
     }
 
     /**
@@ -159,40 +286,46 @@ public:
     /**
      * @brief リサイズ
     */
-    void resize(size_type const w, size_type const h, data_type const & init){
+    void resize(size_type const w, size_type const h, size_type const d, data_type const & init){
         // 幅を合わせる
         if(w < m_width){
-            for(size_type i=0; i<m_width - w; ++i) pop_back_column();
+            pop_back_columns(m_width - w);
         }else if(w > m_width){
-            for(size_type i=0; i<m_width - w; ++i) push_back_column(init);
+            push_back_columns(w - m_width, init);
         }
         // 縦を合わせる
         if(h < m_height){
-            for(size_type i=0; i<m_height - h; ++i) pop_back_row();
+            pop_back_rows(m_height - h);
         }else if(h > m_height){
-            for(size_type i=0; i<m_height - h; ++i) push_back_row(init);
+            push_back_rows(h - m_height, init);
+        }
+        // 奥行を合わせる
+        if(d < m_depth){
+            pop_back_depths(m_depth - d);
+        }else if(d > m_depth){
+            push_back_depths(d - m_depth, init);
         }
     }
 
     /**
      * @brief リサイズ
     */
-    void resize(std::pair<int, int> const & size, data_type const & init){
-        resize(size.first, size.second, init);
+    void resize(std::tuple<size_type, size_type, size_type> const & size, data_type const & init){
+        resize(std::get<0>(size), std::get<1>(size), std::get<2>(size), init);
     }
 
     /**
      * @brief リサイズ
     */
-    void resize(int const w, int const h){
-        resize(w, h, data_type{});
+    void resize(size_type const w, size_type const h, size_type const d){
+        resize(w, h, d, data_type{});
     }
 
     /**
      * @brief リサイズ
     */
-    void resize(std::pair<int, int> const & size){
-        resize(size.first, size.second);
+    void resize(std::tuple<size_type, size_type, size_type> const & size){
+        resize(std::get<0>(size), std::get<1>(size), std::get<2>(size));
     }
 
     /**
@@ -218,31 +351,41 @@ public:
     /**
      * @brief 要素アクセス
     */
-    data_type & at(int const y, int const x){
-        return m_data.at(x + y*m_width);
+    data_type & at(int const z, int const y, int const x){
+        return m_data.at(x + y*m_width + z*m_width*m_height);
     }
-    data_type & at(std::pair<int, int> const pos){
-        return m_data.at(pos.first + pos.second*m_width);
+
+    /**
+     * @brief (x,y,z)のペアにより要素アクセス
+     * @param[in] pos (x,y,z)のペア
+    */
+    data_type & at(std::tuple<int, int, int> const pos){
+        return m_data.at(std::get<0>(pos) + std::get<1>(pos)*m_width + std::get<2>(pos)*m_width*m_height);
     }
 
     /**
      * @brief 要素アクセス const
     */
-    data_type const & at(int const y, int const x) const {
-        return m_data.at(x + y*m_width);
-    }
-    data_type const & at(std::pair<int, int> const pos) const {
-        return m_data.at(pos.first + pos.second*m_width);
+    data_type const & at(int const z, int const y, int const x) const {
+        return m_data.at(x + y*m_width + z*m_width*m_height);
     }
 
     /**
-     * @brief [y][x]で要素アクセス
+     * @brief (x,y,z)のペアにより要素アクセス const
+     * @param[in] pos (x,y,z)のペア
     */
-    data_type * operator [] (int const y){
-        return &m_data[y*m_width];
+    data_type const & at(std::tuple<int, int, int> const pos) const {
+        return m_data.at(std::get<0>(pos) + std::get<1>(pos)*m_width + std::get<2>(pos)*m_width*m_height);
     }
-    data_type const * operator [] (int const y) const {
-        return &m_data[y*m_width];
+
+    /**
+     * @brief [z][y][x]で要素アクセス
+    */
+    Grid3DAccessController<data_type> operator [] (int const z){
+        return Grid3DAccessController<data_type>(this, z);
+    }
+    Grid3DAccessController<data_type> const operator [] (int const z) const {
+        return Grid3DAccessController<data_type>(this, z);
     }
 
     /**
@@ -260,11 +403,25 @@ public:
     }
 
     /**
-     * @brief pairでサイズを返す
-     * @return width, heightのペア
+     * @brief 奥行方向のサイズを返す
     */
-    std::pair<size_t, size_t> size() const {
-        return std::make_pair(m_width, m_height);
+    size_t depth() const {
+        return m_depth;
+    }
+
+    /**
+     * @brief 配列の先頭要素のポインタを返す
+    */
+    data_type * data(){
+        return &m_data;
+    }
+
+    /**
+     * @brief tupleでサイズを返す
+     * @return width, height, depthのペア
+    */
+    std::tuple<size_t, size_t, size_t> size() const {
+        return std::make_tuple(m_width, m_height, m_depth);
     }
 
     /**
@@ -272,22 +429,36 @@ public:
     */
     void print() const {
         for(size_type i=0; i<m_height; ++i){
-            for(size_type j=0; j<m_width; ++j){
-                std::cout << at(i, j) << ' ';
+            for(size_type j=0; j<m_depth; ++j){
+                std::cout << '[';
+                for(size_type k=0; k<m_width; ++k){
+                    std::cout << at(j, i, k);
+                    std::cout << ((k == m_width - 1) ? "" : " ");
+                }
+                std::cout << "] ";
             }
             std::cout << std::endl;
         }
     }
 
     /**
+     * @brief サイズの出力
+    */
+    void print_size() const {
+        std::cout << "(width:" << m_width << " height:" << m_height << " depth:" << m_depth << ")" << std::endl;
+    }
+
+    /**
      * @brief 各要素への一律な操作
-     * @param[in] func y,xを引数として受け取る関数
+     * @param[in] func z,y,xを引数として受け取る関数
     */
     template <typename Function>
     void foreach(const Function & func){
-        for(size_type i=0; i<m_height; ++i){
-            for(size_type j=0; j<m_width; ++j){
-                func(i, j);
+        for(size_type i=0; i<m_depth; ++i){
+            for(size_type j=0; j<m_height; ++j){
+                for(size_type k=0; k<m_width; ++k){
+                    func(i, j, k);
+                }
             }
         }
     }

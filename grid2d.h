@@ -82,7 +82,7 @@ public:
         reserve(m_width, m_height+1);
 
         m_data.insert(m_data.begin() + pos*m_width, m_width, init);
-        ++m_width;
+        ++m_height;
     }
 
     /**

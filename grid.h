@@ -67,11 +67,12 @@ public:
 
     /**
      * @brief pairでサイズを返す
+     * @return width, heightのペア
     */
     size_t size() const {
         return std::make_pair(m_width, m_height);
     }
-}
+};
 
 
 } // namespace Utility

@@ -24,7 +24,7 @@ private:
     size_type m_height = 0;
 
 public:
-    Grid2D(size_type const m_width, size_type const m_height)
+    Grid2D(size_type const m_width = 0, size_type const m_height = 0)
         : m_data(m_width * m_height),
         m_width(m_width),
         m_height(m_height){}
@@ -111,7 +111,7 @@ public:
     void remove_column(int const pos){
         int index = 0;
 
-        auto remove_it = std::remove_if(m_data.begin(), m_data.end(), [width = m_width, &](data_type const &){
+        auto remove_it = std::remove_if(m_data.begin(), m_data.end(), [width = m_width, &pos, &index](data_type const &){
             return (index++) % width == pos;
         });
         m_data.erase(remove_it, m_data.end());
@@ -213,7 +213,7 @@ public:
     data_type & back(){
         return m_data.back();
     }
-    data_type const & front() const {
+    data_type const & back() const {
         return m_data.back();
     }
 
@@ -269,6 +269,30 @@ public:
         return std::make_pair(m_width, m_height);
     }
 
+    /**
+     * @brief 出力
+    */
+    void print() const {
+        for(size_type i=0; i<m_height; ++i){
+            for(size_type j=0; j<m_width; ++j){
+                std::cout << at(i, j) << ' ';
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    /**
+     * @brief 各要素への一律な操作
+     * @param[in] func y,xを引数として受け取る関数
+    */
+    template <typename Function>
+    void foreach(const Function & func){
+        for(size_type i=0; i<m_height; ++i){
+            for(size_type j=0; j<m_width; ++j){
+                func(i, j);
+            }
+        }
+    }
 
 };
 

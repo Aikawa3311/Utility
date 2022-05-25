@@ -31,10 +31,10 @@ public:
      * @brief [y][x]で要素アクセス
     */
     data_type * operator [] (int const y){
-        return grid->data[z_pos * (grid->width()) * (grid->height()) + y * grid->width()];
+        return &(grid->data()[z_pos * (grid->width()) * (grid->height()) + y * grid->width()]);
     }
     data_type const * operator [] (int const y) const {
-        return grid->data[z_pos * (grid->width()) * (grid->height()) + y * grid->width()];
+        return &(grid->data()[z_pos * (grid->width()) * (grid->height()) + y * grid->width()]);
     }
 };
 
@@ -413,7 +413,7 @@ public:
      * @brief 配列の先頭要素のポインタを返す
     */
     data_type * data(){
-        return &m_data;
+        return m_data.data();
     }
 
     /**

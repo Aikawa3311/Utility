@@ -304,6 +304,13 @@ public:
     }
 
     /**
+     * @brief 配列の先頭要素のポインタを返す
+    */
+    data_type * data(){
+        return m_data.data();
+    }
+
+    /**
      * @brief pairでサイズを返す
      * @return width, heightのペア
     */

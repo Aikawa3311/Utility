@@ -417,6 +417,23 @@ public:
     }
 
     /**
+     * @brief 範囲内に収まるかを調べる
+     * @return 収まっていたらtrue
+    */
+    bool in(int const z, int const y, int const x) const {
+        return z >= 0 && z < m_depth && y >= 0 && y < m_height && x >= 0 && x < m_width;
+    }
+
+    /**
+     * @brief (x, y, z)が範囲内に収まるかを調べる
+     * @param[in] pos (x, y, z)のタプル
+     * @return 収まっていたらtrue
+    */
+    bool in(std::tuple<int, int, int> const & pos) const {
+        return in(std::get<2>(pos), std::get<1>(pos), std::get<0>(pos));
+    }
+
+    /**
      * @brief tupleでサイズを返す
      * @return width, height, depthのペア
     */

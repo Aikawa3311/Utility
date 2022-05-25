@@ -311,6 +311,23 @@ public:
     }
 
     /**
+     * @brief 範囲内に収まるかを調べる
+     * @return 収まっていたらtrue
+    */
+    bool in(int const y, int const x) const {
+        return y >= 0 && y < m_height && x >= 0 && x < m_width;
+    }
+
+    /**
+     * @brief (x, y)が範囲内に収まるかを調べる
+     * @param[in] pos (x, y)のペア
+     * @return 収まっていたらtrue
+    */
+    bool in(std::pair<int, int> const & pos) const {
+        return in(pos.second, pos.first);
+    }
+
+    /**
      * @brief pairでサイズを返す
      * @return width, heightのペア
     */

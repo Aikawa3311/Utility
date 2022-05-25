@@ -67,7 +67,7 @@ public:
     void insert_column(int const pos, data_type const & init){
         reserve(m_width+1, m_height);
 
-        for(int i=0; i<m_height; ++i){
+        for(size_type i=0; i<m_height; ++i){
             m_data.insert(m_data.begin() + (pos + i * (m_width + 1)), init);
         }
         ++m_width;
@@ -90,7 +90,7 @@ public:
      * @param[in] init 初期化する値
     */
     void push_back_column(data_type const & init){
-        insert_column(0, init);
+        insert_column(m_width, init);
     }
 
     /**
@@ -98,17 +98,17 @@ public:
      * @param[in] init 初期化する値
     */
     void push_back_row(data_type const & init){
-        for(int i=0; i<m_width; ++i){
+        for(size_type i=0; i<m_width; ++i){
             m_data.push_back(init);
         }
-        ++m_width;
+        ++m_height;
     }
 
     /**
      * @brief 任意の列の削除
      * @param[in] pos 消したい列(pos(0-indexed)列目となるように)
     */
-    void remove_column(int const pos){
+    void remove_column(size_type const pos){
         int index = 0;
 
         auto remove_it = std::remove_if(m_data.begin(), m_data.end(), [width = m_width, &pos, &index](data_type const &){
@@ -161,18 +161,18 @@ public:
     /**
      * @brief リサイズ
     */
-    void resize(int const w, int const h, data_type const & init){
+    void resize(size_type const w, size_type const h, data_type const & init){
         // 幅を合わせる
         if(w < m_width){
-            for(int i=0; i<m_width - w; ++i) pop_back_column();
+            for(size_type i=0; i<m_width - w; ++i) pop_back_column();
         }else if(w > m_width){
-            for(int i=0; i<m_width - w; ++i) push_back_column(init);
+            for(size_type i=0; i<m_width - w; ++i) push_back_column(init);
         }
         // 縦を合わせる
         if(h < m_height){
-            for(int i=0; i<m_height - h; ++i) pop_back_row();
+            for(size_type i=0; i<m_height - h; ++i) pop_back_row();
         }else if(h > m_height){
-            for(int i=0; i<m_height - h; ++i) push_back_row(init);
+            for(size_type i=0; i<m_height - h; ++i) push_back_row(init);
         }
     }
 

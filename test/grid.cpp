@@ -18,5 +18,8 @@ int main(){
     grid.resize(4, 6, 777);
     grid.print();
 
+    grid.at(2, 1) = 9;
+    grid.print();
+
     return 0;
 }

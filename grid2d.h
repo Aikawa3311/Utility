@@ -179,21 +179,21 @@ public:
     /**
      * @brief リサイズ
     */
-    void resize(std::pair<int, int> const & size, data_type const & init){
+    void resize(std::pair<size_type, size_type> const & size, data_type const & init){
         resize(size.first, size.second, init);
     }
 
     /**
      * @brief リサイズ
     */
-    void resize(int const w, int const h){
+    void resize(size_type const w, size_type const h){
         resize(w, h, data_type{});
     }
 
     /**
      * @brief リサイズ
     */
-    void resize(std::pair<int, int> const & size){
+    void resize(std::pair<size_type, size_type> const & size){
         resize(size.first, size.second);
     }
 
@@ -223,6 +223,11 @@ public:
     data_type & at(int const y, int const x){
         return m_data.at(x + y*m_width);
     }
+
+    /**
+     * @brief (x,y)のペアにより要素アクセス
+     * @param[in] pos (x,y)のペア
+    */
     data_type & at(std::pair<int, int> const pos){
         return m_data.at(pos.first + pos.second*m_width);
     }
@@ -233,6 +238,11 @@ public:
     data_type const & at(int const y, int const x) const {
         return m_data.at(x + y*m_width);
     }
+
+    /**
+     * @brief (x,y)のペアにより要素アクセス const
+     * @param[in] pos (x,y)のペア
+    */
     data_type const & at(std::pair<int, int> const pos) const {
         return m_data.at(pos.first + pos.second*m_width);
     }

@@ -3,6 +3,9 @@
  * @note 参照:[https://github.com/Siv3D/OpenSiv3D/blob/main/Siv3D/include/Siv3D/detail/Grid.ipp]
 */
 
+#ifndef UTILITY_GRID2D_H
+#define UTILITY_GRID2D_H
+
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -367,7 +370,89 @@ public:
         }
     }
 
+
+#ifdef UTILITY_POINT2I_H
+
+    // point2i.hがincludeされている場合
+
+    /**
+     * @brief (width, height)のPoint2iから構築
+    */
+    Grid2D(Point2i const & size, data_type const & init)
+        : Grid2D(size.x, size.y, init){}
+
+    /**
+     * @brief (width, height)のPoint2iから構築
+    */
+    Grid2D(Point2i const & size)
+        : Grid2D(size.x, size.y){}
+
+    /**
+     * @brief (x, y)で要素アクセス
+     * @param[in] pos (x,y)のPoint2i
+    */
+    data_type & at(Point2i const & pos){
+        return at(pos.y, pos.x);
+    }
+
+    /**
+     * @brief (x, y)で要素アクセス const
+     * @param[in] pos (x,y)のPoint2i
+    */
+    data_type const & at(Point2i const & pos) const {
+        return at(pos.y, pos.x);
+    }
+
+    /**
+     * @brief (x, y)で要素アクセス
+     * @param[in] pos (x,y)のPoint2i
+    */
+    data_type & operator [] (Point2i const & pos){
+        return operator[](pos.y)[pos.x];
+    }
+
+    /**
+     * @brief (x, y)で要素アクセス const
+     * @param[in] pos (x,y)のPoint2i
+    */
+    data_type const & operator [] (Point2i const & pos) const {
+        return operator[](pos.y)[pos.x];
+    }
+
+    /**
+     * @brief リサイズ
+     * @param[in] size (width, height)のPoint2i
+     * @param[in] init 初期化したい値
+    */
+    void resize(Point2i const & size, data_type const & init){
+        resize(size.x, size.y, init);
+    }
+
+    /**
+     * @brief リサイズ
+     * @param[in] size (width, height)のPoint2i
+    */
+    void resize(Point2i const & size){
+        resize(size.x, size.y);
+    }
+
+    /**
+     * @brief (x, y)が範囲内に収まるかを調べる
+     * @param[in] pos (x, y)のPoint2i
+     * @return 収まっていたらtrue
+    */
+    bool in(Point2i const & pos) const {
+        return in(pos.y, pos.x);
+    }
+
+
+#endif // ifdef UTILITY_POINT2I_H
+
+
 };
 
 
 } // namespace Utility
+
+
+#endif // ifndef UTILITY_GRID2D_H

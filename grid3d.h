@@ -3,6 +3,9 @@
  * @note 参照:[https://github.com/Siv3D/OpenSiv3D/blob/main/Siv3D/include/Siv3D/detail/Grid.ipp]
 */
 
+#ifndef UTILITY_GRID3D_H
+#define UTILITY_GRID3D_H
+
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -567,9 +570,12 @@ public:
         return in(pos.z(), pos.y(), pos.x());
     }
 
-#endif
+#endif // ifdef EIGEN_CORE_H
 
 };
 
 
 } // namespace Utility
+
+
+#endif // ifndef UTILITY_GRID3D_H
